@@ -336,7 +336,14 @@ st.sidebar.title("🧬 CancerStochastique")
 st.sidebar.caption("Multi-Agent System · Q-Learning")
 page = st.sidebar.radio(
     "Navigation",
-    ["Patient Assessment", "Policy Comparison", "State Explorer", "Model Index & Theory"],
+    [
+        "How to Work With the Project",
+        "Patient Assessment",
+        "Policy Comparison",
+        "State Explorer",
+        "Model Index & Theory",
+    ],
+    index=0,
 )
 
 st.sidebar.divider()
@@ -353,10 +360,209 @@ with st.sidebar.expander("Loaded model files"):
     st.caption(f"Policy load time (this run): {POLICY_LOAD_MS:.2f} ms")
 
 # ============================================================
+# HOW TO WORK WITH THE PROJECT
+# ============================================================
+
+if page == "How to Work With the Project":
+    st.title("📖 How to Work with CancerStochastique")
+    st.caption("End-to-End User Guide, Clinical Workflow & Reinforcement Learning Architecture")
+
+    st.markdown("""
+    Welcome to **CancerStochastique**, an interactive computational oncology research platform.
+    This application models sequential cancer therapy decision-making as a **Markov Decision Process (MDP)**,
+    comparing tabular **Q-Learning** and **Double Q-Learning** while enforcing safety guardrails through a 
+    **Multi-Agent "Tumor Board"** consensus engine.
+    """)
+
+    guide_tab1, guide_tab2, guide_tab3, guide_tab4, guide_tab5 = st.tabs([
+        "🚀 5-Step Clinical Workflow",
+        "🧭 Dashboard Modules",
+        "🤖 Multi-Agent Tumor Board",
+        "💻 Offline CLI & Simulation",
+        "📐 Mathematical Foundations",
+    ])
+
+    with guide_tab1:
+        st.subheader("Step-by-Step Interactive Workflow")
+        st.write(
+            "Follow these 5 steps to evaluate synthetic patient cases, inspect policy decisions, "
+            "and examine the underlying Markov dynamics."
+        )
+
+        st.markdown("""
+        #### 1️⃣ Enter Patient Clinical Profile
+        Navigate to **Patient Assessment** in the left sidebar and provide the patient's clinical parameters:
+        * **Cancer Type:** Lung, Breast, Colorectal, or Prostate.
+        * **Clinical Stage:** Stage I, II, III, or IV.
+        * **Metastatic Spread:** None, Bone, Liver, Lung, Brain, or Multiple sites.
+        * **Prior Treatment Lines:** 0 (treatment-naïve), 1, 2, 3, or 4+ lines.
+        * **Current Status:** Alive or Deceased.
+
+        #### 2️⃣ Observe Markov State Encoding
+        The continuous/categorical patient profile $\\mathcal{X}_i(t)$ is deterministically projected into 
+        a discrete 4-dimensional tuple $(D, P, U, B)$:
+        * **$D$ (Disease Severity):** $0 = \\text{Low}$ (Stage I/II, no metastases) vs. $1 = \\text{High}$ (Stage III/IV or metastatic).
+        * **$P$ (Prognosis):** $0 = \\text{Good}$ vs. $1 = \\text{Poor}$ (acute mortality risk, Stage IV with Brain/Multiple metastases).
+        * **$U$ (Treatment Utility):** $0 = \\text{None}, 1 = \\text{Low}, 2 = \\text{Medium}, 3 = \\text{High}$.
+        * **$B$ (Biological Response):** $0 = \\text{Responsive}$ vs. $1 = \\text{Resistant}$ (refractory after multiple therapy lines or multiple metastatic sites).
+        
+        The integer **State ID** is calculated as:
+        $$\\text{State } S = 16D + 8P + 2U + B \\quad \\in \\{0, 1, \\dots, 31\\}$$
+
+        #### 3️⃣ Compare Reinforcement Learning Policies
+        The application queries the pre-trained Q-tables for state $S$ across 7 possible therapeutic actions:
+        * **Actions $\\mathcal{A}$:** Observation (0), Surgery (1), Chemotherapy (2), Radiation (3), Immunotherapy (4), Combination (5), Palliative (6).
+        * **Standard Q-Learning:** Selects $\\arg\\max_a Q(s, a)$.
+        * **Double Q-Learning:** Mitigates maximization overestimation bias by maintaining two independent estimators $Q_A$ and $Q_B$.
+
+        #### 4️⃣ Review Multi-Agent Tumor Board Consensus
+        Rather than blind reliance on reinforcement learning, a virtual **Tumor Board** of 4 specialized agents deliberates:
+        * **DiagnosticAgent, PrognosticAgent, and BiologicalAgent** examine clinical guidelines and can **veto** dangerous or futile AI choices.
+        * **Consensus Engine** tallies majority agreement and outputs the final consensus decision.
+
+        #### 5️⃣ Inspect Transition Probabilities & Reward Metrics
+        Head to **Model Index & Theory** to:
+        * Inspect the empirical $32 \\times 32$ Markov transition matrix $\\mathcal{P}(s' \\mid s, a)$ as an interactive heatmap.
+        * Test transition reward calculations step-by-step using the health differential $\\Delta = Q(s') - Q(s)$ and treatment cost penalty.
+        """)
+
+    with guide_tab2:
+        st.subheader("Overview of Dashboard Modules")
+        st.write("CancerStochastique provides 4 primary modules via the sidebar navigation:")
+
+        mod_col1, mod_col2 = st.columns(2)
+        with mod_col1:
+            st.markdown("""
+            ### 🧑‍⚕️ 1. Patient Assessment
+            * **Purpose:** Interactive case simulation and clinical decision support.
+            * **Key Features:**
+              * Real-time state decomposition ($D, P, U, B$) and state label.
+              * Side-by-side action recommendations (Q-Learning vs. Double Q-Learning).
+              * Multi-Agent Tumor Board consensus with individual agent rationales.
+              * High-resolution sub-millisecond execution timing metrics.
+            """)
+
+            st.markdown("""
+            ### 📊 2. Policy Comparison
+            * **Purpose:** Macro-level comparative analysis across all 32 discrete states.
+            * **Key Features:**
+              * Side-by-side table of optimal actions for each state $S00 \\dots S31$.
+              * Overall policy agreement percentage metric.
+              * Action distribution bar charts highlighting therapy aggressiveness.
+              * One-click CSV export of the full comparison table.
+            """)
+
+        with mod_col2:
+            st.markdown("""
+            ### 🔍 3. State Explorer
+            * **Purpose:** In-depth inspection of individual Markov states.
+            * **Key Features:**
+              * Dropdown selector for all 32 states.
+              * Detailed clinical component breakdown ($D, P, U, B$).
+              * Absorbing terminal state indicators ($S06$ Recovery vs $S25$ Death).
+              * Recommended treatments under each reinforcement learning policy.
+            """)
+
+            st.markdown("""
+            ### 📚 4. Model Index & Theory
+            * **Purpose:** Theoretical formulation, transition tensors, and reward dynamics.
+            * **Key Features:**
+              * 3D transition probability tensor $\\mathcal{P}(s' \\mid s, a)$ documentation.
+              * Interactive 2D heatmap viewer for any of the 7 treatment actions.
+              * Interactive step-by-step reward calculator ($R(s, a, s')$).
+              * Mathematical links to the Bellman Optimality Equation.
+            """)
+
+    with guide_tab3:
+        st.subheader("Multi-Agent Tumor Board Architecture")
+        st.write(
+            "In critical clinical domains, pure reinforcement learning can recommend hazardous treatments "
+            "due to stochastic fluctuations or dataset bias. CancerStochastique wraps RL agents in a multi-agent "
+            "consensus committee with explicit clinical veto rules:"
+        )
+
+        st.markdown("""
+        | Agent | Clinical Focus | Primary Veto / Override Rule |
+        | :--- | :--- | :--- |
+        | **DiagnosticAgent** | Disease Burden ($D$) | • **Vetoes Observation** if $D=1$ (high severity requires active intervention).<br>• **Vetoes Combination** if $D=0$ (avoids unnecessary toxicity in early stage). |
+        | **PrognosticAgent** | Mortality Risk ($P$) | • **Recommends Palliative Care** if $D=1, P=1, B=1$ (prevents futile aggressive therapy in refractory end-stage cases). |
+        | **BiologicalAgent** | Drug Resistance ($B$) | • **Redirects Chemotherapy $\\to$ Immunotherapy** if tumor is resistant ($B=1$). |
+        | **TreatmentAgent** | RL Policy Optimization | • Proposes the action maximizing expected discounted return from the learned Q-table $\\arg\\max_a Q(s, a)$. |
+        """)
+
+        st.info(
+            "**Consensus Mechanism:** Each agent submits a vote. The MultiAgentSystem tallies votes, "
+            "applies clinical veto constraints, and uses the TreatmentAgent's Q-values to break any ties."
+        )
+
+    with guide_tab4:
+        st.subheader("Offline CLI Commands & Simulation")
+        st.write("You can train models, run test suites, or launch agent-based simulations locally:")
+
+        st.markdown("#### 1. Running the Automated Test Suite")
+        st.code("pytest", language="bash")
+        st.caption("Validates 20 unit tests covering state encodings, reward functions, Bellman updates, and agent vetoes.")
+
+        st.markdown("#### 2. Training Reinforcement Learning Agents Offline")
+        st.code("""# Train Double Q-Learning (10,000 episodes)
+python3 agents/train.py --data data/cancer_treatment_dataset.csv --algorithm double_q_learning
+
+# Train Standard Q-Learning
+python3 agents/train.py --data data/cancer_treatment_dataset.csv --algorithm q_learning""", language="bash")
+
+        st.markdown("#### 3. Generating Synthetic Patient Cohorts")
+        st.code("python3 data/data_generator.py --n-patients 25000", language="bash")
+
+        st.markdown("#### 4. Running NetLogo 7.0 Agent-Based Simulation")
+        st.write(
+            "To visualize virtual patient cohorts navigating disease states in a 2D cellular automaton model:"
+        )
+        st.markdown("""
+        1. Open **NetLogo 7.0+**.
+        2. Open file: `simulation/CancerStochastique_Final.nlogox`.
+        3. Click **Setup** to populate virtual tumors and patient agents.
+        4. Click **Go** to watch the cohort evolve over time under Q-Learning vs Double Q-Learning policies.
+        """)
+
+    with guide_tab5:
+        st.subheader("Mathematical Foundations")
+        st.markdown("#### 1. Patient Observation Space $\\mathcal{X}(t)$")
+        st.latex(r"\mathcal{X}_i(t) = \{C_i, G_i, O_i, M_i, T_i(t)\}")
+        st.markdown("""
+        * $C_i$: Primary cancer site $\\in \\{\\text{Lung, Breast, Colorectal, Prostate}\\}$.
+        * $G_i$: Stage $\\in \\{\\text{I, II, III, IV}\\}$.
+        * $O_i$: Vital status $\\in \\{\\text{Alive, Deceased}\\}$.
+        * $M_i$: Metastatic site $\\in \\{\\text{None, Bone, Liver, Lung, Brain, Multiple}\\}$.
+        * $T_i(t)$: Cumulative treatment history.
+        """)
+
+        st.markdown("#### 2. Health Quality Metric $Q(s)$ & Differential Reward $R(s, a, s')$")
+        st.latex(r"Q(s) = -\Big(2D + 2P - U + 2B\Big)")
+        st.latex(r"\Delta = Q(s') - Q(s)")
+        st.latex(r"""
+        R(s, a, s') = \begin{cases}
+        +30.0 & \text{if } s' = 6 \text{ (Full Recovery)} \\
+        -50.0 & \text{if } s' = 25 \text{ (Terminal Death)} \\
+        +10.0 \times \Delta & \text{if } \Delta > 0 \text{ (Health Improvement)} \\
+        +1.0 & \text{if } \Delta = 0 \text{ (Stability)} \\
+        -5.0 \times |\Delta| & \text{if } \Delta < 0 \text{ (Deterioration)}
+        \end{cases} \quad - \quad \mathbf{1}_{\{a > 0\}}
+        """)
+
+        st.markdown("#### 3. Bellman Optimality Equation")
+        st.latex(r"Q^*(s, a) = \sum_{s' \in \mathcal{S}} \mathcal{P}(s' \mid s, a) \left[ R(s, a, s') + \gamma \max_{a' \in \mathcal{A}} Q^*(s', a') \right]")
+        st.caption("With discount factor $\\gamma = 0.95$, balancing immediate toxicity against long-term survival.")
+
+        st.warning("""
+        **⚠️ Research & Educational Prototype Disclaimer:**
+        This software is an educational research prototype designed to investigate stochastic modeling and reinforcement learning dynamics in simulated oncology environments. **It is not certified for clinical use and does not provide real medical advice or clinical treatment recommendations.** Do not enter real or identifiable patient data.
+        """)
+
+# ============================================================
 # PATIENT ASSESSMENT
 # ============================================================
 
-if page == "Patient Assessment":
+elif page == "Patient Assessment":
     st.title("Patient Case Explorer")
     st.write(
         "Enter the case information below. The application will "
