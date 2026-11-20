@@ -1,11 +1,32 @@
-/.venv
-/venv
-.idea
-.vscode
-**/__pycache__/
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python bytecode & cache
+__pycache__/
 *.py[cod]
 *$py.class
-.DS_Store
 .pytest_cache/
 .coverage
 htmlcov/
+*.egg-info/
+dist/
+build/
+
+# IDE & OS files
+.idea/
+.vscode/
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Streamlit secrets and local cache (DO NOT COMMIT SECRETS)
+.streamlit/secrets.toml
+.streamlit/data/
+
+# Environment files
+.env
+.env.*
+!.env.example

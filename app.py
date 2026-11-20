@@ -72,6 +72,8 @@ def find_project_root():
 ROOT = find_project_root()
 RESULTS_DIRS = [
     ROOT / "results_training" / "netlogo",
+    ROOT / "results_training" / "models",
+    ROOT / "results_training" / "tables",
     ROOT / "results_training",
     ROOT / "output",
     ROOT,
